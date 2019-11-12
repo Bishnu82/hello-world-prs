@@ -112,4 +112,3 @@ public class Vendor {
 				+ ", state=" + state + ", zip=" + zip + ", phoneNumber=" + phoneNumber + ", email=" + email + "]";
 	}
 }
-// constraint vcode unique (code)

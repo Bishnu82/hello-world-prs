@@ -1,14 +1,14 @@
 package com.prs.web;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 
+import com.prs.web.JsonResponse;
 import com.prs.business.Request;
 import com.prs.db.RequestRepository;
-
-
-
 
 @CrossOrigin
 @RestController
@@ -17,7 +17,7 @@ public class RequestController {
 	@Autowired
 	private RequestRepository requestRepo;
 	
-	//list - return all stuffies
+	//list - return all requests
 	@GetMapping("/")
 	public JsonResponse listRequests() {
 		JsonResponse jr = null;
@@ -45,17 +45,22 @@ public class RequestController {
 		return jr;
 	}
 	
-//  demo of Request Parameters
-//	@GetMapping("")
-//	public Stuffy creatAStuffy(@RequestParam int id, @RequestParam String type, @RequestParam String color, @RequestParam String size, @RequestParam int limbs) {
-//		Stuffy s = new Stuffy(id, type, color, size, limbs);
-//		return s;
-//	}
-	
-	//add - adds a new Stuffy
+	@GetMapping("/list-review/{id}")
+	public JsonResponse findByStatus(@PathVariable int id) {
+		JsonResponse jr = null;
+		try {
+			jr = JsonResponse.getInstance(requestRepo.findByUserIdNotLikeAndStatus(id, "pending"));
+		}
+		catch (Exception e){
+			jr = JsonResponse.getInstance(e);
+			e.printStackTrace();
+		}
+		return jr;
+	}
+		
+	//add - adds a new requests
 	@PostMapping("/")
 	public JsonResponse addARequest(@RequestBody Request r) {
-		//add a new stuffy
 		JsonResponse jr = null;
 		try {
 			jr = JsonResponse.getInstance(requestRepo.save(r));
@@ -71,17 +76,52 @@ public class RequestController {
 		return jr;
 	}
 	
-	//update - update a Stuffy
+	@PutMapping("/approve")
+	public JsonResponse approveRequest(@RequestBody Request r) {
+		JsonResponse jr = null;
+		try {
+			r.setStatus("approved");
+			jr = JsonResponse.getInstance(requestRepo.save(r));
+		}
+		catch (DataIntegrityViolationException dive){
+			jr = JsonResponse.getInstance(dive.getRootCause().getMessage());
+			dive.printStackTrace();
+		}
+		catch (Exception e){
+			jr = JsonResponse.getInstance(e);
+			e.printStackTrace();
+		}
+		return jr;
+	}
+	
+	@PutMapping("/reject")
+	public JsonResponse rejectRequest(@RequestBody Request r) {
+		JsonResponse jr = null;
+		try {
+			r.setStatus("reject");
+			jr = JsonResponse.getInstance(requestRepo.save(r));
+		}
+		catch (DataIntegrityViolationException dive){
+			jr = JsonResponse.getInstance(dive.getRootCause().getMessage());
+			dive.printStackTrace();
+		}
+		catch (Exception e){
+			jr = JsonResponse.getInstance(e);
+			e.printStackTrace();
+		}
+		return jr;
+	}
+	
+	//update - update a requests
 	@PutMapping("/")
 	public JsonResponse updateRequest(@RequestBody Request r) {
-		// update a stuffy
 		JsonResponse jr = null;
 		try {
 			if (requestRepo.existsById(r.getId())) {
 			jr = JsonResponse.getInstance(requestRepo.save(r));
 		}
 		else {
-			jr = JsonResponse.getInstance("Error updating Actor. id:  "+r.getId()+"dosent exist!");
+			jr = JsonResponse.getInstance("Error updating Request. id:  "+r.getId()+"dosent exist!");
 		}
 		}
 		catch (Exception e){
@@ -91,9 +131,26 @@ public class RequestController {
 		return jr;
 	}
 	
+	@PutMapping("/submit-review")
+	public JsonResponse findByStatus(@RequestBody Request r) {
+		JsonResponse jr = null;
+		try {
+			if (r.getTotal()<=50) {
+				r.setStatus("approved");
+			       Date dateobj = new Date();
+				r.setSubmittedDate(dateobj);
+			jr = JsonResponse.getInstance(requestRepo.save(r));
+			}
+		}
+		catch (Exception e){
+			jr = JsonResponse.getInstance(e);
+		}
+		return jr;
+	}
+	
 	@DeleteMapping("/{id}")
 	public JsonResponse deleteRequest(@PathVariable int id) {
-		// delete a stuffy
+		// delete a requests
 		JsonResponse jr = null;
 		
 		try {
@@ -103,7 +160,7 @@ public class RequestController {
 		}
 		else {
 			//record dosent exist
-			jr = JsonResponse.getInstance("Error deleting Actor. id:  "+id+"dosent exist!");
+			jr = JsonResponse.getInstance("Error deleting Request. id:  "+id+"dosent exist!");
 		}
 		}
 		catch (DataIntegrityViolationException dive){
@@ -116,6 +173,4 @@ public class RequestController {
 		}
 		return jr;
 	}
-	
-
 }

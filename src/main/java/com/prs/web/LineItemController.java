@@ -1,23 +1,28 @@
 package com.prs.web;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 
+import com.prs.web.JsonResponse;
 import com.prs.business.LineItem;
+import com.prs.business.Product;
+import com.prs.business.Request;
 import com.prs.db.LineItemRepository;
-
-
-
+import com.prs.db.RequestRepository;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/lineitems")
+@RequestMapping("/line-items")
 public class LineItemController {
 	@Autowired
 	private LineItemRepository lineItemRepo;
-	
-	//list - return all stuffies
+	@Autowired
+	private RequestRepository requestRepo;
+		
+	//list - return all line-items
 	@GetMapping("/")
 	public JsonResponse listLineItems() {
 		JsonResponse jr = null;
@@ -45,20 +50,31 @@ public class LineItemController {
 		return jr;
 	}
 	
-//  demo of Request Parameters
-//	@GetMapping("")
-//	public Stuffy creatAStuffy(@RequestParam int id, @RequestParam String type, @RequestParam String color, @RequestParam String size, @RequestParam int limbs) {
-//		Stuffy s = new Stuffy(id, type, color, size, limbs);
-//		return s;
-//	}
-	
-	//add - adds a new Stuffy
-	@PostMapping("/")
-	public JsonResponse addALineItem(@RequestBody LineItem l) {
-		//add a new stuffy
+	@GetMapping("/lines-for-pr/{id}")
+	public JsonResponse listRLines(@PathVariable Request id) {
 		JsonResponse jr = null;
 		try {
+			jr = JsonResponse.getInstance(lineItemRepo.findByRequest(id));
+		}
+		catch (Exception e){
+			jr = JsonResponse.getInstance(e);
+			e.printStackTrace();
+		}
+		return jr;
+	}
+	
+	//add - adds a new line-items
+	@PostMapping("/")
+	public JsonResponse addALineItem(@RequestBody LineItem l) {
+		// add a new line-item
+		JsonResponse jr = null;
+		// for all maintenance methods recalculate the collection value
+		try {
+			// 1 do maintenance
 			jr = JsonResponse.getInstance(lineItemRepo.save(l));
+			// 2 recalcCollectionValue
+			recalcTotal(l.getRequest());
+			// what user are we looking for
 		}
 		catch (DataIntegrityViolationException dive){
 			jr = JsonResponse.getInstance(dive.getRootCause().getMessage());
@@ -71,17 +87,17 @@ public class LineItemController {
 		return jr;
 	}
 	
-	//update - update a Stuffy
+		//update - update a line-items
 	@PutMapping("/")
 	public JsonResponse updateLineItem(@RequestBody LineItem l) {
-		// update a stuffy
 		JsonResponse jr = null;
 		try {
 			if (lineItemRepo.existsById(l.getId())) {
 			jr = JsonResponse.getInstance(lineItemRepo.save(l));
+			recalcTotal(l.getRequest());
 		}
 		else {
-			jr = JsonResponse.getInstance("Error updating Actor. id:  "+l.getId()+"dosent exist!");
+			jr = JsonResponse.getInstance("Error updating LineItem. id:  "+l.getId()+"dosent exist!");
 		}
 		}
 		catch (Exception e){
@@ -93,17 +109,19 @@ public class LineItemController {
 	
 	@DeleteMapping("/{id}")
 	public JsonResponse deleteLineItem(@PathVariable int id) {
-		// delete a stuffy
+		// delete a line-items
 		JsonResponse jr = null;
 		
 		try {
 			if (lineItemRepo.existsById(id)) {
 				lineItemRepo.deleteById(id);
-			jr = JsonResponse.getInstance("Delete successful!");
+				jr = JsonResponse.getInstance("Delete successful!");
+				LineItem l = new LineItem();
+				recalcTotal(l.getRequest());
 		}
 		else {
 			//record dosent exist
-			jr = JsonResponse.getInstance("Error deleting Actor. id:  "+id+"dosent exist!");
+			jr = JsonResponse.getInstance("Error deleting LineItem:  "+id+"dosent exist!");
 		}
 		}
 		catch (DataIntegrityViolationException dive){
@@ -117,5 +135,26 @@ public class LineItemController {
 		return jr;
 	}
 	
+	//method will recalculate the collectionValuse and save it in the user instance
 
+	private void recalcTotal(Request r) {
+		try {
+		// get a list of lineitems
+		// all line items for user
+		List<LineItem> lineItemList = lineItemRepo.findByRequest(r);
+		// loop through list to sum a total
+		double total = 0.0;
+		for (LineItem li:lineItemList) {
+			Product p = li.getProduct();
+			double lITotal = p.getPrice() * li.getQuantity();
+			total += lITotal;
+		}
+		// save total in request instance
+			r.setTotal(total);
+			requestRepo.save(r);
+		}
+		catch (Exception e) {
+			throw e;
+		}
+	}
 }

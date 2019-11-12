@@ -4,11 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 
+import com.prs.web.JsonResponse;
 import com.prs.business.User;
 import com.prs.db.UserRepository;
-
-
-
 
 @CrossOrigin
 @RestController
@@ -17,7 +15,7 @@ public class UserController {
 	@Autowired
 	private UserRepository userRepo;
 	
-	//list - return all stuffies
+	//list - return all users
 	@GetMapping("/")
 	public JsonResponse listUsers() {
 		JsonResponse jr = null;
@@ -45,17 +43,22 @@ public class UserController {
 		return jr;
 	}
 	
-//  demo of Request Parameters
-//	@GetMapping("")
-//	public Stuffy creatAStuffy(@RequestParam int id, @RequestParam String type, @RequestParam String color, @RequestParam String size, @RequestParam int limbs) {
-//		Stuffy s = new Stuffy(id, type, color, size, limbs);
-//		return s;
-//	}
+	@PostMapping("/login")
+	public JsonResponse findByUserName(@RequestBody User u) {
+		JsonResponse jr = null;
+		try {
+			jr = JsonResponse.getInstance(userRepo.findByUserNameAndPassword(u.getUserName(),u.getPassword()));
+			jr = JsonResponse.getInstance("Login Succesful");
+		}
+		catch (Exception e){
+			jr = JsonResponse.getInstance(e);
+		}
+		return jr;
+	}
 	
-	//add - adds a new Stuffy
+	//add - adds a new users
 	@PostMapping("/")
 	public JsonResponse addAUser(@RequestBody User u) {
-		//add a new stuffy
 		JsonResponse jr = null;
 		try {
 			jr = JsonResponse.getInstance(userRepo.save(u));
@@ -71,17 +74,16 @@ public class UserController {
 		return jr;
 	}
 	
-	//update - update a Stuffy
+	//update - update a users
 	@PutMapping("/")
 	public JsonResponse updateActor(@RequestBody User u) {
-		// update a stuffy
 		JsonResponse jr = null;
 		try {
 			if (userRepo.existsById(u.getId())) {
 			jr = JsonResponse.getInstance(userRepo.save(u));
 		}
 		else {
-			jr = JsonResponse.getInstance("Error updating Actor. id:  "+u.getId()+"dosent exist!");
+			jr = JsonResponse.getInstance("Error updating User. id:  "+u.getId()+"dosent exist!");
 		}
 		}
 		catch (Exception e){
@@ -93,7 +95,7 @@ public class UserController {
 	
 	@DeleteMapping("/{id}")
 	public JsonResponse deleteUser(@PathVariable int id) {
-		// delete a stuffy
+		// delete a users
 		JsonResponse jr = null;
 		
 		try {
@@ -103,7 +105,7 @@ public class UserController {
 		}
 		else {
 			//record dosent exist
-			jr = JsonResponse.getInstance("Error deleting Actor. id:  "+id+"dosent exist!");
+			jr = JsonResponse.getInstance("Error deleting User. id:  "+id+"dosent exist!");
 		}
 		}
 		catch (DataIntegrityViolationException dive){
@@ -116,6 +118,4 @@ public class UserController {
 		}
 		return jr;
 	}
-	
-
 }

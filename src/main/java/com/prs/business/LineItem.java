@@ -7,19 +7,23 @@ public class LineItem {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
-	private int requestID;
-	private int productID;
+	@ManyToOne
+	@JoinColumn(name="RequestID")
+	private Request request;
+	@ManyToOne
+	@JoinColumn(name="ProductID")
+	private Product product;
 	private int quantity;
 	
 	public LineItem() {
 		super();
 	}
 
-	public LineItem(int id, int requestID, int productID, int quantity) {
+	public LineItem(int id, Request request, Product product, int quantity) {
 		super();
 		this.id = id;
-		this.requestID = requestID;
-		this.productID = productID;
+		this.request = request;
+		this.product = product;
 		this.quantity = quantity;
 	}
 
@@ -31,20 +35,20 @@ public class LineItem {
 		this.id = id;
 	}
 
-	public int getRequestID() {
-		return requestID;
+	public Request getRequest() {
+		return request;
 	}
 
-	public void setRequestID(int requestID) {
-		this.requestID = requestID;
+	public void setRequest(Request request) {
+		this.request = request;
 	}
 
-	public int getProductID() {
-		return productID;
+	public Product getProduct() {
+		return product;
 	}
 
-	public void setProductID(int productID) {
-		this.productID = productID;
+	public void setProduct(Product product) {
+		this.product = product;
 	}
 
 	public int getQuantity() {
@@ -57,10 +61,7 @@ public class LineItem {
 
 	@Override
 	public String toString() {
-		return "lineItem [id=" + id + ", requestID=" + requestID + ", productID=" + productID + ", quantity=" + quantity
+		return "lineItem [id=" + id + ", requestID=" + request + ", productID=" + product + ", quantity=" + quantity
 				+ "]";
 	}
 }
-//  foreign key (productID) references product(id),
-//  foreign key (requestID) references request(id),
-//	constraint req_pdt unique (requestID, productID)

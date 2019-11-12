@@ -113,4 +113,3 @@ public class User {
 				+ isReviewer + ", isAdmin=" + isAdmin + "]";
 	}
 }
-// constraint uname unique (username)

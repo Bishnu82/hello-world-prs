@@ -7,9 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import com.prs.business.Product;
 import com.prs.db.ProductRepository;
 
-
-
-
 @CrossOrigin
 @RestController
 @RequestMapping("/products")
@@ -17,7 +14,7 @@ public class ProductController {
 	@Autowired
 	private ProductRepository productRepo;
 	
-	//list - return all stuffies
+	//list - return all products
 	@GetMapping("/")
 	public JsonResponse listProducts() {
 		JsonResponse jr = null;
@@ -45,17 +42,9 @@ public class ProductController {
 		return jr;
 	}
 	
-//  demo of Request Parameters
-//	@GetMapping("")
-//	public Stuffy creatAStuffy(@RequestParam int id, @RequestParam String type, @RequestParam String color, @RequestParam String size, @RequestParam int limbs) {
-//		Stuffy s = new Stuffy(id, type, color, size, limbs);
-//		return s;
-//	}
-	
-	//add - adds a new Stuffy
+	//add - adds a new products
 	@PostMapping("/")
 	public JsonResponse addAProduct(@RequestBody Product p) {
-		//add a new stuffy
 		JsonResponse jr = null;
 		try {
 			jr = JsonResponse.getInstance(productRepo.save(p));
@@ -71,17 +60,16 @@ public class ProductController {
 		return jr;
 	}
 	
-	//update - update a Stuffy
+	//update - update a products
 	@PutMapping("/")
 	public JsonResponse updateProduct(@RequestBody Product p) {
-		// update a stuffy
 		JsonResponse jr = null;
 		try {
 			if (productRepo.existsById(p.getId())) {
 			jr = JsonResponse.getInstance(productRepo.save(p));
 		}
 		else {
-			jr = JsonResponse.getInstance("Error updating Actor. id:  "+p.getId()+"dosent exist!");
+			jr = JsonResponse.getInstance("Error updating Product. id:  "+p.getId()+"dosent exist!");
 		}
 		}
 		catch (Exception e){
@@ -93,7 +81,7 @@ public class ProductController {
 	
 	@DeleteMapping("/{id}")
 	public JsonResponse deleteProduct(@PathVariable int id) {
-		// delete a stuffy
+		// delete a products
 		JsonResponse jr = null;
 		
 		try {
@@ -103,7 +91,7 @@ public class ProductController {
 		}
 		else {
 			//record dosent exist
-			jr = JsonResponse.getInstance("Error deleting Actor. id:  "+id+"dosent exist!");
+			jr = JsonResponse.getInstance("Error deleting Product. id:  "+id+"dosent exist!");
 		}
 		}
 		catch (DataIntegrityViolationException dive){
@@ -116,6 +104,4 @@ public class ProductController {
 		}
 		return jr;
 	}
-	
-
 }
