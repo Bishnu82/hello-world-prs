@@ -1,6 +1,6 @@
 package com.prs.web;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -137,8 +137,7 @@ public class RequestController {
 		try {
 			if (r.getTotal()<=50) {
 				r.setStatus("approved");
-			       Date dateobj = new Date();
-				r.setSubmittedDate(dateobj);
+				r.setSubmittedDate(LocalDateTime.now());
 			jr = JsonResponse.getInstance(requestRepo.save(r));
 			}
 		}

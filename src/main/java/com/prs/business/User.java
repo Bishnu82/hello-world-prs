@@ -6,15 +6,15 @@ import javax.persistence.*;
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public int id;     		
-    public String userName;
-    public String password;
-    public String firstName;
-    public String lastName;
-    public String phoneNumber;
-    public String email;
-	public boolean isReviewer;
-    public boolean isAdmin;
+	private int id;     		
+	private String userName;
+	private String password;
+	private String firstName;
+	private String lastName;
+	private String phoneNumber;
+	private String email;
+	private boolean isReviewer;
+	private boolean isAdmin;
 	
     public User() {
 		super();
@@ -90,19 +90,20 @@ public class User {
 		this.email = email;
 	}
 
-	public boolean getIsReviewer() {
+
+	public boolean isReviewer() {
 		return isReviewer;
 	}
 
-	public void setIsReviewer(boolean isReviewer) {
+	public void setReviewer(boolean isReviewer) {
 		this.isReviewer = isReviewer;
 	}
 
-	public boolean getIsAdmin() {
+	public boolean isAdmin() {
 		return isAdmin;
 	}
 
-	public void setIsAdmin(boolean isAdmin) {
+	public void setAdmin(boolean isAdmin) {
 		this.isAdmin = isAdmin;
 	}
 
